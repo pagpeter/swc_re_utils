@@ -1,0 +1,27 @@
+[package]
+name = "deobfuscator"
+version = "0.1.0"
+edition = "2024"
+
+[lib]
+name = "deobfuscator"
+path = "src/lib.rs"
+
+[dependencies]
+chrono = "0.4.41"
+regex = "1.11.1"
+swc = "25.0.0"
+swc_core = { version = "26.2.0", features = [
+    "common",
+    "ecma_utils",
+    "ecma_plugin_transform",
+    "ecma_codegen",
+    "ecma_transforms_optimization"
+] }
+swc_common = "11.0.0"
+swc_ecma_ast = "11.0.0"
+swc_ecma_minifier = "20.0.2"
+swc_ecma_parser = "14.0.0"
+swc_ecma_transforms = "19.0.0"
+swc_ecma_visit = "11.0.0"
+swc_ecma_codegen = "13.1.0"
