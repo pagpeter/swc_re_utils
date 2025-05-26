@@ -56,12 +56,16 @@ impl VisitMut for EvaluateVisitor {
     fn visit_mut_bin_expr(&mut self, expr: &mut swc_ecma_ast::BinExpr) {
         expr.visit_mut_children_with(self);
         
-        // Special case: check if right operand is a unary minus and operator is minus
-        if expr.op == swc_ecma_ast::BinaryOp::Sub {
-            if let Expr::Unary(unary) = &*expr.right {
-                if unary.op == swc_ecma_ast::UnaryOp::Minus {
-                    // Convert to addition with the positive value
+        // Special case: check if right operand is a unary minus
+        if let Expr::Unary(unary) = &*expr.right {
+            if unary.op == swc_ecma_ast::UnaryOp::Minus {
+                if expr.op == swc_ecma_ast::BinaryOp::Sub {
+                    // Convert subtraction with negative to addition: a - (-b) => a + b
                     expr.op = swc_ecma_ast::BinaryOp::Add;
+                    expr.right = unary.arg.clone();
+                } else if expr.op == swc_ecma_ast::BinaryOp::Add {
+                    // Convert addition with negative to subtraction: a + (-b) => a - b
+                    expr.op = swc_ecma_ast::BinaryOp::Sub;
                     expr.right = unary.arg.clone();
                 }
             }
