@@ -27,8 +27,8 @@ fn main() {
     ast.visit_mut_with(&mut transformations::normalize_ast::Visitor {});
     ast.visit_mut_with(&mut transformations::sequence_exprs::Visitor {});
     ast.visit_mut_with(&mut transformations::constant_evaluation::Visitor {});
+    ast.visit_mut_with(&mut transformations::remove_unused::DeadCodeVisitor {});
 
-    // ast.visit_mut_with(&mut transformations::remove_unused::DeadCodeVisitor {});
     // ast.visit_mut_with(&mut transformations::cleanup_deleted::Visitor {});
 
     let out = swc_utils::generate_code(ast);

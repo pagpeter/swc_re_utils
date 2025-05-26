@@ -69,6 +69,34 @@ impl VisitMut for Visitor {
         }
     }
 
+    fn visit_mut_expr(&mut self, expr: &mut Expr) {
+        expr.visit_mut_children_with(self);
+        
+        // Replace ![] with true
+        if let Expr::Unary(unary) = expr {
+            if unary.op == swc_ecma_ast::UnaryOp::Bang && 
+               matches!(&*unary.arg, Expr::Array(arr) if arr.elems.is_empty()) {
+                *expr = Expr::Lit(Lit::Bool(swc_ecma_ast::Bool {
+                    span: DUMMY_SP,
+                    value: true,
+                }));
+            }
+        }
+        
+        // Replace !![] with false
+        if let Expr::Unary(unary) = expr {
+            if unary.op == swc_ecma_ast::UnaryOp::Bang && 
+               matches!(&*unary.arg, Expr::Unary(inner) if 
+                       inner.op == swc_ecma_ast::UnaryOp::Bang && 
+                       matches!(&*inner.arg, Expr::Array(arr) if arr.elems.is_empty())) {
+                *expr = Expr::Lit(Lit::Bool(swc_ecma_ast::Bool {
+                    span: DUMMY_SP,
+                    value: false,
+                }));
+            }
+        }
+    }
+
     fn visit_mut_program(&mut self, n: &mut Program) {
         println!("[*] Normalizing ast");
         n.visit_mut_children_with(self);
