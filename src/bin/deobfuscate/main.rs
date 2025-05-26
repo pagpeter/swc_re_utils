@@ -22,7 +22,7 @@ fn main() {
     let src = fs::read_to_string(filename).expect("Unable to read file");
     logger.success(format!("Read {} chars from {}", src.len(), filename).as_str());
 
-    let mut ast = swc_utils::parse_func_str(src);
+    let mut ast = swc_utils::parse_func_str(src.clone());
 
     ast.visit_mut_with(&mut transformations::normalize_ast::Visitor {});
     ast.visit_mut_with(&mut transformations::sequence_exprs::Visitor {});
@@ -30,6 +30,8 @@ fn main() {
     ast.visit_mut_with(&mut transformations::remove_unused::DeadCodeVisitor {});
 
     ast.visit_mut_with(&mut transformations::obfuscatorio::proxy_functions::Visitor {});
+    ast.visit_mut_with(&mut transformations::obfuscatorio::string_array::Visitor::new(src));
+
     ast.visit_mut_with(&mut transformations::cleanup::Visitor {});
 
     let out = swc_utils::generate_code(ast);

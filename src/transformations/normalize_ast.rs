@@ -78,7 +78,7 @@ impl VisitMut for Visitor {
                matches!(&*unary.arg, Expr::Array(arr) if arr.elems.is_empty()) {
                 *expr = Expr::Lit(Lit::Bool(swc_ecma_ast::Bool {
                     span: DUMMY_SP,
-                    value: true,
+                    value: false,
                 }));
             }
         }
@@ -91,7 +91,7 @@ impl VisitMut for Visitor {
                        matches!(&*inner.arg, Expr::Array(arr) if arr.elems.is_empty())) {
                 *expr = Expr::Lit(Lit::Bool(swc_ecma_ast::Bool {
                     span: DUMMY_SP,
-                    value: false,
+                    value: true,
                 }));
             }
         }

@@ -16,7 +16,8 @@ swc_core = { version = "26.2.0", features = [
     "ecma_utils",
     "ecma_plugin_transform",
     "ecma_codegen",
-    "ecma_transforms_optimization"
+    "ecma_transforms_optimization",
+    "swc_atoms"
 ] }
 swc_common = "11.0.0"
 swc_ecma_ast = "11.0.0"
@@ -25,3 +26,4 @@ swc_ecma_parser = "14.0.0"
 swc_ecma_transforms = "19.0.0"
 swc_ecma_visit = "11.0.0"
 swc_ecma_codegen = "13.1.0"
+swc_atoms = "5.0.0"
