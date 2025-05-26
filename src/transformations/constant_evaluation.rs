@@ -51,7 +51,6 @@ impl VisitMut for EvaluateVisitor {
             }
         }
     }
-    
     // Handle binary expressions with special attention to double negatives
     fn visit_mut_bin_expr(&mut self, expr: &mut swc_ecma_ast::BinExpr) {
         expr.visit_mut_children_with(self);
@@ -68,6 +67,31 @@ impl VisitMut for EvaluateVisitor {
                     expr.op = swc_ecma_ast::BinaryOp::Sub;
                     expr.right = unary.arg.clone();
                 }
+            }
+        }
+
+        // Try to evaluate the entire binary expression
+        if let Some(res) = self.evaluator.eval(&Expr::Bin(expr.clone())) {
+            if let eval::EvalResult::Lit(lit) = res {
+                *expr = swc_ecma_ast::BinExpr {
+                    span: expr.span,
+                    op: expr.op,
+                    left: Box::new(*expr.left.clone()),
+                    right: Box::new(Expr::Lit(lit)),
+                };
+            }
+        }
+    }
+
+    // Handle assignments with constant expressions
+    fn visit_mut_assign_expr(&mut self, expr: &mut swc_ecma_ast::AssignExpr) {
+        expr.right.visit_mut_with(self);
+        expr.left.visit_mut_with(self);
+        
+        // Try to evaluate the right side of the assignment
+        if let Some(res) = self.evaluator.eval(&expr.right) {
+            if let eval::EvalResult::Lit(lit) = res {
+                expr.right = Box::new(Expr::Lit(lit));
             }
         }
     }

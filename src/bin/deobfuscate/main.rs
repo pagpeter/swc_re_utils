@@ -29,7 +29,8 @@ fn main() {
     ast.visit_mut_with(&mut transformations::constant_evaluation::Visitor {});
     ast.visit_mut_with(&mut transformations::remove_unused::DeadCodeVisitor {});
 
-    // ast.visit_mut_with(&mut transformations::cleanup_deleted::Visitor {});
+    ast.visit_mut_with(&mut transformations::obfuscatorio::proxy_functions::Visitor {});
+    ast.visit_mut_with(&mut transformations::cleanup::Visitor {});
 
     let out = swc_utils::generate_code(ast);
     fs::write(filename.replace(".js", ".out.js"), out).expect("Unable to write file");
