@@ -21,10 +21,10 @@
             if (_0x422734 === _0x4e694b) {
                 break;
             } else {
-                _0x4bbafb['push'](_0x4bbafb['shift']());
+                _0x4bbafb.push(_0x4bbafb.shift());
             }
         } catch (_0x6b2506) {
-            _0x4bbafb['push'](_0x4bbafb['shift']());
+            _0x4bbafb.push(_0x4bbafb.shift());
         }
     }
 }(_0x5189, 2 * 758981 + -1090347 + -47 * -10297), (function() {

@@ -1,6 +1,8 @@
 use swc_common::{DUMMY_SP, util::take::Take};
 use swc_core::ecma::visit::{VisitMut, VisitMutWith};
-use swc_ecma_ast::{BlockStmt, ForStmt, IfStmt, Number, Program};
+use swc_ecma_ast::{
+    BlockStmt, Expr, ForStmt, IdentName, IfStmt, Lit, MemberExpr, MemberProp, Number, Program,
+};
 
 pub struct Visitor {}
 
@@ -51,6 +53,19 @@ impl VisitMut for Visitor {
                 ..Default::default()
             }
             .into();
+        }
+    }
+
+    fn visit_mut_member_expr(&mut self, member_expr: &mut MemberExpr) {
+        member_expr.visit_mut_children_with(self);
+
+        if let MemberProp::Computed(property) = &member_expr.prop {
+            if let Expr::Lit(Lit::Str(s)) = &*property.expr {
+                if !s.value.contains('-') {
+                    member_expr.prop =
+                        MemberProp::Ident(IdentName::new(s.value.clone(), property.span));
+                }
+            }
         }
     }
 

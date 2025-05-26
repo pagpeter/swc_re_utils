@@ -1,7 +1,7 @@
 use swc_common::GLOBALS;
 use swc_core::ecma::ast::Expr;
 use swc_core::ecma::visit::{VisitMut, VisitMutWith};
-use swc_ecma_ast::{Lit, Program};
+use swc_ecma_ast::{Lit, Module, ModuleItem, Program, Script};
 use swc_ecma_minifier::eval::Evaluator;
 use swc_ecma_minifier::{self, eval, marks};
 struct EvaluateVisitor {
@@ -18,7 +18,6 @@ impl VisitMut for EvaluateVisitor {
     fn visit_mut_expr(&mut self, expr: &mut Expr) {
         expr.visit_mut_children_with(self);
 
-        println!("Eval");
         if let Some(res) = self.evaluator.eval(expr) {
             match res {
                 eval::EvalResult::Lit(lit) => match lit {
@@ -40,14 +39,26 @@ impl VisitMut for Visitor {
 
         GLOBALS.set(&Default::default(), || {
             let m: marks::Marks = marks::Marks::new();
-            let evaluator = match n.as_module() {
-                Some(module) => Evaluator::new(module.to_owned(), m),
-                None => return, // Exit early if not a module
+
+            let module = match n {
+                Program::Module(module_prog) => Module {
+                    body: module_prog.body.clone(),
+                    ..Default::default()
+                },
+                Program::Script(script) => Module {
+                    body: script
+                        .body
+                        .iter()
+                        .map(|stmt| ModuleItem::Stmt(stmt.clone()))
+                        .collect(),
+                    ..Default::default()
+                },
             };
+
+            let evaluator = Evaluator::new(module, m);
             let mut visitor = EvaluateVisitor::new(evaluator);
 
-            n.visit_mut_children_with(&mut visitor);
-            n.visit_mut_children_with(self);
+            n.visit_mut_with(&mut visitor);
         })
     }
 }
