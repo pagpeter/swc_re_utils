@@ -1,6 +1,6 @@
 // all credit to https://github.com/manudeobs/turnstile-rs/blob/c03c0e4b0e9e67fb7ca45243ce0e446e3fc0de17/src/ast/visitor/dead_code.rs
 
-use swc_common::util::take::Take;
+use swc_common::{SyntaxContext, util::take::Take};
 use swc_ecma_ast::{BinaryOp, CondExpr, Expr, IfStmt, Program, Stmt};
 use swc_ecma_visit::{VisitMut, VisitMutWith, noop_visit_mut_type};
 
@@ -171,5 +171,43 @@ impl VisitMut for DeadCodeVisitor {
         }
 
         *path = new_stmts
+    }
+
+    fn visit_mut_while_stmt(&mut self, stmt: &mut swc_ecma_ast::WhileStmt) {
+        stmt.visit_mut_children_with(self);
+
+        if let Expr::Lit(lit) = &*stmt.test {
+            if let swc_ecma_ast::Lit::Bool(bool_lit) = lit {
+                if !bool_lit.value {
+                    // Replace while(false) with an empty block
+                    stmt.body = Box::new(Stmt::Block(swc_ecma_ast::BlockStmt {
+                        span: stmt.span,
+                        stmts: vec![],
+                        ctxt: SyntaxContext::empty(),
+                    }));
+                }
+            }
+        }
+    }
+
+    fn visit_mut_if_stmt(&mut self, stmt: &mut swc_ecma_ast::IfStmt) {
+        stmt.visit_mut_children_with(self);
+
+        if let Expr::Lit(lit) = &*stmt.test {
+            if let swc_ecma_ast::Lit::Bool(bool_lit) = lit {
+                if !bool_lit.value {
+                    // If there's an else clause, use it; otherwise use empty block
+                    if let Some(alt) = &stmt.alt {
+                        *stmt.cons = *alt.clone();
+                    } else {
+                        *stmt.cons = *Box::new(Stmt::Block(swc_ecma_ast::BlockStmt {
+                            span: stmt.span,
+                            stmts: vec![],
+                            ctxt: SyntaxContext::empty(),
+                        }));
+                    }
+                }
+            }
+        }
     }
 }
