@@ -4,14 +4,12 @@ use swc_core::ecma::utils::ExprFactory;
 use swc_core::ecma::visit::{VisitMut, VisitMutWith};
 use swc_ecma_ast::{ForStmt, IfStmt, Program, ReturnStmt};
 
-pub struct Visitor {
-
-}
+pub struct Visitor {}
 
 impl VisitMut for Visitor {
     fn visit_mut_stmts(&mut self, n: &mut std::vec::Vec<swc_ecma_ast::Stmt>) {
         n.visit_mut_children_with(self);
-        let mut new_stmtns: std::vec::Vec<swc_ecma_ast::Stmt> = vec![];
+        let mut new_stmts: std::vec::Vec<swc_ecma_ast::Stmt> = vec![];
 
         for stmt in &n.to_owned() {
             let mut added = false;
@@ -20,7 +18,7 @@ impl VisitMut for Visitor {
                 if expr.is_seq() {
                     let seq = expr.as_seq().unwrap();
                     for expr in &seq.exprs {
-                        new_stmtns
+                        new_stmts
                             .push(<Box<swc_ecma_ast::Expr> as Clone>::clone(&expr).into_stmt());
                     }
                     added = true;
@@ -36,10 +34,10 @@ impl VisitMut for Visitor {
                     let mut seq = tmp.as_seq().unwrap().exprs.to_vec();
                     let last = seq.pop();
                     for expr in seq {
-                        new_stmtns
+                        new_stmts
                             .push(<Box<swc_ecma_ast::Expr> as Clone>::clone(&expr).into_stmt());
                     }
-                    new_stmtns.push(swc_ecma_ast::Stmt::Return(ReturnStmt {
+                    new_stmts.push(swc_ecma_ast::Stmt::Return(ReturnStmt {
                         span: Span::dummy(),
                         arg: last,
                     }));
@@ -53,10 +51,10 @@ impl VisitMut for Visitor {
                     let last = seq.pop().unwrap();
 
                     for expr in &seq {
-                        new_stmtns
+                        new_stmts
                             .push(<Box<swc_ecma_ast::Expr> as Clone>::clone(&expr).into_stmt());
                     }
-                    new_stmtns.push(swc_ecma_ast::Stmt::If(IfStmt {
+                    new_stmts.push(swc_ecma_ast::Stmt::If(IfStmt {
                         span: Span::dummy(),
                         test: last,
                         cons: if_stmt.cons.to_owned(),
@@ -87,11 +85,11 @@ impl VisitMut for Visitor {
                     let last = seq.pop();
 
                     for expr in &seq {
-                        new_stmtns
+                        new_stmts
                             .push(<Box<swc_ecma_ast::Expr> as Clone>::clone(&expr).into_stmt());
                     }
                     if last.is_some() {
-                        new_stmtns.push(swc_ecma_ast::Stmt::For(ForStmt {
+                        new_stmts.push(swc_ecma_ast::Stmt::For(ForStmt {
                             span: Span::dummy(),
                             test: for_stmt.test.to_owned(),
                             init: Some(swc_ecma_ast::VarDeclOrExpr::Expr(last.unwrap())),
@@ -105,10 +103,10 @@ impl VisitMut for Visitor {
             }
 
             if !added {
-                new_stmtns.push(stmt.to_owned());
+                new_stmts.push(stmt.to_owned());
             }
         }
-        *n = new_stmtns;
+        *n = new_stmts;
     }
     fn visit_mut_program(&mut self, n: &mut Program) {
         println!("[*] Replacing sequence expressions");
