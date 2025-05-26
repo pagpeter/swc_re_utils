@@ -5,6 +5,10 @@ use swc_ecma_ast::{Lit, Module, ModuleItem, Program};
 use swc_ecma_minifier::eval::Evaluator;
 use swc_ecma_minifier::{self, eval, marks};
 
+use crate::utils;
+
+
+
 struct EvaluateVisitor {
     evaluator: Evaluator,
 }
@@ -32,6 +36,38 @@ impl VisitMut for EvaluateVisitor {
             }
         }
     }
+
+
+    fn visit_mut_expr_stmt(&mut self, stmt: &mut swc_ecma_ast::ExprStmt) {
+        stmt.expr.visit_mut_children_with(self);
+        
+        // After visiting children, try to evaluate the expression
+        if let Some(res) = self.evaluator.eval(&stmt.expr) {
+            match res {
+                eval::EvalResult::Lit(lit) => {
+                    stmt.expr = Box::from(Expr::Lit(lit));
+                }
+                _ => {}
+            }
+        }
+    }
+    
+    // Handle binary expressions with special attention to double negatives
+    fn visit_mut_bin_expr(&mut self, expr: &mut swc_ecma_ast::BinExpr) {
+        expr.visit_mut_children_with(self);
+        
+        // Special case: check if right operand is a unary minus and operator is minus
+        if expr.op == swc_ecma_ast::BinaryOp::Sub {
+            if let Expr::Unary(unary) = &*expr.right {
+                if unary.op == swc_ecma_ast::UnaryOp::Minus {
+                    // Convert to addition with the positive value
+                    expr.op = swc_ecma_ast::BinaryOp::Add;
+                    expr.right = unary.arg.clone();
+                }
+            }
+        }
+    }
+
 }
 
 pub struct Visitor;
