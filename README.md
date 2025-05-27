@@ -4,16 +4,16 @@
 
 This library aims to be a thin wrapper around the [swc](https://swc.rs/) library, to help with deobfuscating and reverse-engineering.
 
-Links: [rustdoc](https://rustdoc.swc.rs/swc_re_utils) and [crates.io](https://crates.io/crates/swc_re_utils)
+Links: [crates.io](https://crates.io/crates/swc_re_utils)
 
 ## How
 
-The usage is quite simple, just run `cargo add swc_re_utils`.
+The usage is quite simple, just run `cargo add swc_re_utils swc_ecma_visit` to get started.
 
 ```rust
 use swc_re_utils::transformations;
 use swc_re_utils::utils::swc_utils;
-use std::{env, fs};
+use std::fs;
 use swc_ecma_visit::VisitMutWith;
 
 fn main() {
