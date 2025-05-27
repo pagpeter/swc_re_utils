@@ -1,12 +1,12 @@
 # SWC Utilities
 
-## What
+### What
 
 This library aims to be a thin wrapper around the [swc](https://swc.rs/) library, to help with deobfuscating and reverse-engineering.
 
 Links: [crates.io](https://crates.io/crates/swc_re_utils)
 
-## How
+### How
 
 The usage is quite simple, just run `cargo add swc_re_utils swc_ecma_visit swc_ecma_ast swc_common swc_atoms` to get started.
 
