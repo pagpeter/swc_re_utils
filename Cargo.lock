@@ -416,24 +416,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "deobfuscator"
-version = "0.1.0"
-dependencies = [
- "chrono",
- "regex",
- "swc",
- "swc_atoms",
- "swc_common",
- "swc_core",
- "swc_ecma_ast",
- "swc_ecma_codegen",
- "swc_ecma_minifier",
- "swc_ecma_parser",
- "swc_ecma_transforms",
- "swc_ecma_visit",
-]
-
-[[package]]
 name = "derive_builder"
 version = "0.20.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2690,6 +2672,24 @@ dependencies = [
  "swc_ecma_ast",
  "swc_trace_macro",
  "tracing",
+]
+
+[[package]]
+name = "swc_re_utils"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "regex",
+ "swc",
+ "swc_atoms",
+ "swc_common",
+ "swc_core",
+ "swc_ecma_ast",
+ "swc_ecma_codegen",
+ "swc_ecma_minifier",
+ "swc_ecma_parser",
+ "swc_ecma_transforms",
+ "swc_ecma_visit",
 ]
 
 [[package]]

@@ -5,10 +5,6 @@ use swc_ecma_ast::{Lit, Module, ModuleItem, Program};
 use swc_ecma_minifier::eval::Evaluator;
 use swc_ecma_minifier::{self, eval, marks};
 
-use crate::utils;
-
-
-
 struct EvaluateVisitor {
     evaluator: Evaluator,
 }
@@ -37,10 +33,9 @@ impl VisitMut for EvaluateVisitor {
         }
     }
 
-
     fn visit_mut_expr_stmt(&mut self, stmt: &mut swc_ecma_ast::ExprStmt) {
         stmt.expr.visit_mut_children_with(self);
-        
+
         // After visiting children, try to evaluate the expression
         if let Some(res) = self.evaluator.eval(&stmt.expr) {
             match res {
@@ -54,7 +49,7 @@ impl VisitMut for EvaluateVisitor {
     // Handle binary expressions with special attention to double negatives
     fn visit_mut_bin_expr(&mut self, expr: &mut swc_ecma_ast::BinExpr) {
         expr.visit_mut_children_with(self);
-        
+
         // Special case: check if right operand is a unary minus
         if let Expr::Unary(unary) = &*expr.right {
             if unary.op == swc_ecma_ast::UnaryOp::Minus {
@@ -87,7 +82,7 @@ impl VisitMut for EvaluateVisitor {
     fn visit_mut_assign_expr(&mut self, expr: &mut swc_ecma_ast::AssignExpr) {
         expr.right.visit_mut_with(self);
         expr.left.visit_mut_with(self);
-        
+
         // Try to evaluate the right side of the assignment
         if let Some(res) = self.evaluator.eval(&expr.right) {
             if let eval::EvalResult::Lit(lit) = res {
@@ -96,6 +91,17 @@ impl VisitMut for EvaluateVisitor {
         }
     }
 
+    fn visit_mut_call_expr(&mut self, expr: &mut swc_ecma_ast::CallExpr) {
+        expr.visit_mut_children_with(self);
+
+        for arg in &mut expr.args {
+            if let Some(res) = self.evaluator.eval(&arg.expr) {
+                if let eval::EvalResult::Lit(lit) = res {
+                    arg.expr = Box::new(Expr::Lit(lit));
+                }
+            }
+        }
+    }
 }
 
 pub struct Visitor;
@@ -105,7 +111,6 @@ impl VisitMut for Visitor {
         println!("[*] Running constant evaluation");
 
         GLOBALS.set(&Default::default(), || {
-            let m: marks::Marks = marks::Marks::new();
             let module = match n {
                 Program::Module(module_prog) => Module {
                     body: module_prog.body.clone(),
@@ -122,7 +127,8 @@ impl VisitMut for Visitor {
                 },
             };
 
-            let evaluator = Evaluator::new(module, m);
+            let marks = marks::Marks::new();
+            let evaluator = Evaluator::new(module, marks);
             let mut visitor = EvaluateVisitor::new(evaluator);
 
             n.visit_mut_with(&mut visitor);

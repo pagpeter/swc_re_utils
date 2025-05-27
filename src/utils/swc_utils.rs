@@ -1,10 +1,10 @@
 use std::sync::Arc;
-use swc_common::input::StringInput;
-use swc_common::SourceMap;
-use swc_common::sync::Lrc;
 use swc_common::FileName;
-use swc_ecma_codegen::{Emitter, text_writer::JsWriter};
+use swc_common::SourceMap;
+use swc_common::input::StringInput;
+use swc_common::sync::Lrc;
 use swc_ecma_ast::{Lit, Program};
+use swc_ecma_codegen::{Emitter, text_writer::JsWriter};
 use swc_ecma_parser::{EsSyntax, Parser, Syntax};
 
 // Much credit goes to https://github.com/manudeobs/turnstile-rs/blob/master/src/ast/utils.rs
@@ -12,10 +12,7 @@ use swc_ecma_parser::{EsSyntax, Parser, Syntax};
 pub fn parse_func_str(script: String) -> Program {
     let cm: Lrc<SourceMap> = Default::default();
 
-    let fm = cm.new_source_file(
-        FileName::Custom("test.js".into()).into(),
-        script,
-    );
+    let fm = cm.new_source_file(FileName::Custom("test.js".into()).into(), script);
 
     let mut parser = Parser::new(
         Syntax::Es(EsSyntax::default()),
@@ -23,10 +20,7 @@ pub fn parse_func_str(script: String) -> Program {
         None,
     );
 
-
-    let program = parser
-        .parse_program()
-        .expect("failed to parser module");
+    let program = parser.parse_program().expect("failed to parser module");
 
     program
 }
@@ -46,7 +40,6 @@ pub fn generate_code(ast: Program) -> String {
     let code = String::from_utf8_lossy(&buf).to_string();
     code
 }
-
 
 pub fn number_from_lit(lit: &Lit) -> f64 {
     let num: f64;

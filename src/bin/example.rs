@@ -1,36 +1,26 @@
-use deobfuscator::transformations;
-use deobfuscator::utils::logger::Logger;
-use deobfuscator::utils::swc_utils;
 use std::{env, fs};
 use swc_ecma_visit::VisitMutWith;
+use swc_re_utils::transformations;
+use swc_re_utils::utils::swc_utils;
 
-extern crate deobfuscator;
+extern crate swc_re_utils;
+
 fn main() {
     unsafe {
         std::env::set_var("RUST_BACKTRACE", "1");
     }
 
-    let logger = Logger::new("main");
     let args: Vec<String> = env::args().collect();
-    let filename = args.get(1);
-    if filename.is_none() {
-        return logger.error("You must pass in the file path");
-    }
-
-    let filename = filename.unwrap();
+    let filename = args.get(1).expect("Needs filename as argument");
 
     let src = fs::read_to_string(filename).expect("Unable to read file");
-    logger.success(format!("Read {} chars from {}", src.len(), filename).as_str());
-
     let mut ast = swc_utils::parse_func_str(src.clone());
 
     ast.visit_mut_with(&mut transformations::normalize_ast::Visitor {});
+
     ast.visit_mut_with(&mut transformations::sequence_exprs::Visitor {});
     ast.visit_mut_with(&mut transformations::constant_evaluation::Visitor {});
     ast.visit_mut_with(&mut transformations::remove_unused::DeadCodeVisitor {});
-
-    ast.visit_mut_with(&mut transformations::obfuscatorio::proxy_functions::Visitor {});
-    ast.visit_mut_with(&mut transformations::obfuscatorio::string_array::Visitor::new(src));
 
     ast.visit_mut_with(&mut transformations::cleanup::Visitor {});
 

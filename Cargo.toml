@@ -1,10 +1,13 @@
 [package]
-name = "deobfuscator"
+name = "swc_re_utils"
 version = "0.1.0"
 edition = "2024"
+description = "Utility functions for working with SWC"
+license = "MIT"
+repository = "https://github.com/pagpeter/swc_re_utils"
 
 [lib]
-name = "deobfuscator"
+name = "swc_re_utils"
 path = "src/lib.rs"
 
 [dependencies]
@@ -17,7 +20,7 @@ swc_core = { version = "26.2.0", features = [
     "ecma_plugin_transform",
     "ecma_codegen",
     "ecma_transforms_optimization",
-    "swc_atoms"
+    "swc_atoms",
 ] }
 swc_common = "11.0.0"
 swc_ecma_ast = "11.0.0"
