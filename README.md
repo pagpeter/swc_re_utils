@@ -43,7 +43,6 @@ fn main() {
 **Writing a visitor**
 
 ```rust
-use swc_common::util::take::Take;
 use swc_ecma_ast::{Decl, ModuleDecl, ModuleItem, Stmt, VarDeclarator};
 use swc_ecma_visit::{VisitMut, VisitMutWith};
 pub struct Visitor {}
