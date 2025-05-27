@@ -61,9 +61,16 @@ impl VisitMut for Visitor {
 
         if let MemberProp::Computed(property) = &member_expr.prop {
             if let Expr::Lit(Lit::Str(s)) = &*property.expr {
-                if !s.value.contains('-') {
-                    member_expr.prop =
-                        MemberProp::Ident(IdentName::new(s.value.clone(), property.span));
+                let value = &s.value;
+                // Only convert if it's a valid identifier:
+                // - Doesn't contain invalid chars like '-', '.', etc.
+                // - Doesn't start with a number
+                // - Is not empty
+                if !value.is_empty() && 
+                   !value.chars().next().unwrap().is_numeric() &&
+                   !value.contains(|c: char| !c.is_alphanumeric() && c != '_') &&
+                   !matches!(value.as_str(), "constructor" | "prototype" | "__proto__") {
+                    member_expr.prop = MemberProp::Ident(IdentName::new(value.clone(), property.span));
                 }
             }
         }
