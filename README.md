@@ -8,7 +8,7 @@ Links: [crates.io](https://crates.io/crates/swc_re_utils)
 
 ## How
 
-The usage is quite simple, just run `cargo add swc_re_utils swc_ecma_visit swc_ecma_ast swc_common` to get started.
+The usage is quite simple, just run `cargo add swc_re_utils swc_ecma_visit swc_ecma_ast swc_common swc_atoms` to get started.
 
 **Parsing AST & Running visitors**
 
