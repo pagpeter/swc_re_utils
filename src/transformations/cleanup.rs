@@ -110,11 +110,11 @@ impl VisitMut for Visitor {
         n.visit_mut_children_with(self);
 
         n.props.retain(|s| {
-            let as_kv = s.as_prop();
-            if as_kv.is_some() {
-                let kv = as_kv.unwrap().as_key_value().unwrap();
-                if kv.value.is_invalid() {
-                    return false;
+            if let Some(prop) = s.as_prop() {
+                if let Some(key_value) = prop.as_key_value() {
+                    if key_value.value.is_invalid() {
+                        return false;
+                    }
                 }
             }
             true
